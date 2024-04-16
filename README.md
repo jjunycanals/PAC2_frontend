@@ -1,3 +1,13 @@
+# Instruccions PAC 2
+
+Exercici 1 passar de Promise a Observable completat.
+
+
+# GIT PAC 2
+
+https://github.com/jjunycanals/PAC2_frontend.git
+
+
 # BlogUocProjectFront
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.5.
