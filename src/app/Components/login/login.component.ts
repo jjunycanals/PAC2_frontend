@@ -3,6 +3,7 @@ import {
   UntypedFormBuilder,
   UntypedFormControl,
   UntypedFormGroup,
+  FormBuilder,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +14,13 @@ import { HeaderMenusService } from 'src/app/Services/header-menus.service';
 import { LocalStorageService } from 'src/app/Services/local-storage.service';
 import { SharedService } from 'src/app/Services/shared.service';
 import { AuthToken } from 'src/app/Services/auth.service';
+
+// Importar mòduls REDUX
+import { Store } from '@ngrx/store';
+import { AppState } from 'src/app/Store/app.state';
+import { login } from 'src/app/Store/auth/auth.actions';
+import { Observable } from 'rxjs';
+
 
 @Component({
   selector: 'app-login',
@@ -25,8 +33,10 @@ export class LoginComponent implements OnInit {
   password: UntypedFormControl;
   loginForm: UntypedFormGroup;
   authToken: AuthToken | undefined;
+  authToken$: Observable<AuthToken>;
 
   constructor(
+    private store: Store<AppState>,
     private formBuilder: UntypedFormBuilder,
     private authService: AuthService,
     private sharedService: SharedService,
@@ -47,10 +57,15 @@ export class LoginComponent implements OnInit {
       Validators.maxLength(16),
     ]);
 
+    // this.loginForm = this.formBuilder.group({
+    //   email: this.email,
+    //   password: this.password,
+    // });
     this.loginForm = this.formBuilder.group({
-      email: this.email,
-      password: this.password,
+      email: ['', [Validators.required, Validators.email]], // canvi a FormBuilder
+      password: ['', [Validators.required, Validators.minLength(8)]], // canvi a FormBuilder
     });
+    this.authToken$ = this.store.select((state) => state.auth.token); // Observando el estado de autenticación
   }
 
   ngOnInit(): void {}
@@ -62,42 +77,26 @@ export class LoginComponent implements OnInit {
 
     this.loginUser.email = this.email.value;
     this.loginUser.password = this.password.value;
-    // try {
-    // const authToken = await this.authService.login(this.loginUser);
-    //   responseOK = true;
-    //   this.loginUser.user_id = authToken.user_id;
-    //   this.loginUser.access_token = authToken.access_token;
-    //   // save token to localstorage for next requests
-    //   this.localStorageService.set('user_id', this.loginUser.user_id);
-    //   this.localStorageService.set('access_token', this.loginUser.access_token);
-    // } catch (error: any) {
-    //   responseOK = false;
-    //   errorResponse = error.error;
-    //   const headerInfo: HeaderMenus = {
-    //     showAuthSection: false,
-    //     showNoAuthSection: true,
-    //   };
-    //   this.headerMenusService.headerManagement.next(headerInfo);
 
-    //   this.sharedService.errorLog(error.error);
-    // }
     this.authService.login(this.loginUser).subscribe(
       (loginResult: AuthToken) => {
-        this.authToken = loginResult;
-        this.loginUser.user_id = this.authToken.user_id;
-        this.loginUser.access_token = this.authToken.access_token;
-        this.localStorageService.set('user_id', this.loginUser.user_id);
-        this.localStorageService.set(
-          'access_token',
-          this.loginUser.access_token
-        );
-        responseOK = true;
-        const headerInfo: HeaderMenus = {
-          showAuthSection: true,
-          showNoAuthSection: false,
-        };
-        this.headerMenusService.headerManagement.next(headerInfo);
+        this.store.dispatch(login({ authDTO: this.loginUser }));
         this.router.navigateByUrl('home');
+        // this.authToken = loginResult;
+        // this.loginUser.user_id = this.authToken.user_id;
+        // this.loginUser.access_token = this.authToken.access_token;
+        // this.localStorageService.set('user_id', this.loginUser.user_id);
+        // this.localStorageService.set(
+        //   'access_token',
+        //   this.loginUser.access_token
+        // );
+        // responseOK = true;
+        // const headerInfo: HeaderMenus = {
+        //   showAuthSection: true,
+        //   showNoAuthSection: false,
+        // };
+        // this.headerMenusService.headerManagement.next(headerInfo);
+        // this.router.navigateByUrl('home');
       },
       (error) => {
         responseOK = false;

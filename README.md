@@ -1,7 +1,12 @@
 # Instruccions PAC 2
 
 Exercici 1 passar de Promise a Observable completat.
+  - AuthService: login
+  - CategoryService: getCategoriesByUserId, createCategory, getCategoryById, updateCategory, deleteCategory
+  - PostService: getPosts, getPostsByUserId, createPost, getPostById, updatePost, likePost, dislikePost, deletePost
+  - UserService: register, updateUser, getUSerById
 
+Exercici 2 treballar login.components.ts fet. Falta fer el canvi en algunes parts del projecte canviar de extreure userID de l'estat de  Auth en lloc del localStorage.
 
 # GIT PAC 2
 
